@@ -8,6 +8,21 @@ const ACE_BONUS_MULTIPLIER = 1000; // # Special multiplier for aces bonus;
 
 const DEFAULT_DICES_NB = 5; // # Number of dices by default in the set;
 
+function newQuote(quote) {
+    let pElement = document.createElement('p');
+    let node = document.createTextNode(quote);
+    pElement.appendChild(node);
+    let gameQuotesContener = document.getElementById('gameQuotes');
+
+    // Supprime toutes les citations précédentes
+    // while (gameQuotesContener.firstChild) {
+    //     gameQuotesContener.removeChild(gameQuotesContener.firstChild)
+    // }
+
+    // Ajoute la nouvelle citation
+    gameQuotesContener.appendChild(pElement)
+}
+
 function roll_dice_set(nb_dice_to_roll) {
   let dice_value_occurrence = Array(NB_DICE_SIDE).fill(0);
   let dice_index = 0;
@@ -122,7 +137,7 @@ function analyse_score(dice_value_occurrence) {
     let scoring_dice = scoring_dice_value_occurrence
     let non_scoring_dice = non_scoring_dice_from_std
 
-    console.log("state " + score_std)
+    // console.log("state " + score_std)
 
     return {
             score,
@@ -162,7 +177,7 @@ function game_turn(is_interactive=true) {
         if (roll_score.score == 0) {
             // # lost roll
 
-            console.log('\n-->' + 'got zero point ' + turn_score + 'lost points\n')
+            // console.log('\n-->' + 'got zero point ' + turn_score + 'lost points\n')
             newQuote('\n-->' + 'got zero point ' + turn_score + 'lost points\n')
 
 
@@ -177,15 +192,14 @@ function game_turn(is_interactive=true) {
             // # In case of scoring roll and no remaining dice to roll the player can roll again the full set of dices
             if (remaining_dice_to_roll == 0) {
                 remaining_dice_to_roll = DEFAULT_DICES_NB
-                console.log('-->Full Roll')
+                // console.log('-->Full Roll')
                 newQuote('-->Full Roll')
             }
 
-            console.log(roll_score.score)
-            console.log('Roll Score='+ roll_score.score + 'potential turn score='+ turn_score + 'remaining dice=' +
-                  remaining_dice_to_roll)
-            newQuote('Roll Score='+ roll_score.score + 'potential turn score='+ turn_score + 'remaining dice=' +
-                  remaining_dice_to_roll)
+            // console.log(roll_score.score)
+            // console.log('Roll Score='+ roll_score.score + 'potential turn score='+ turn_score + 'remaining dice=' +
+            //       remaining_dice_to_roll)
+            newQuote(`Roll Score= ${roll_score.score}, potential turn score= ${turn_score}, remaining dice= ${remaining_dice_to_roll}`)
 
             // # choice to roll again or stop and take roll score
             if (is_interactive) {
@@ -194,15 +208,11 @@ function game_turn(is_interactive=true) {
                 // stop_turn = input("Do you want to roll this dice ? [y/n] ") == "n"
                 stop_turn = !confirm("Do you want to roll this dice ? [y/n] ")
             }
-            else {
-                // # random decision for game simulation (50/50)
-                stop_turn = (random.randint(1, 100) % 2) == 0
-            }
 
             if (stop_turn) {
                 // # stop turn and take roll score
 
-                console.log('\n-->' + 'Scoring turn with' + turn_score + 'points\n')
+                // console.log('\n-->' + 'Scoring turn with' + turn_score + 'points\n')
                 newQuote('\n-->' + 'Scoring turn with' + turn_score + 'points\n')
 
                 roll_again = false
@@ -217,23 +227,7 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function newQuote(quote) {
-    const pElement = document.createElement('p')
-    let node = document.createTextNode(quote)
-    pElement.appendChild(node)
-    let gameQuotesContener = document.getElementById('gameQuotes')
-    
-    // Supprime toutes les citations précédentes
-    while (gameQuotesContener.firstChild) {
-        gameQuotesContener.removeChild(gameQuotesContener.firstChild)
-    }
-    
-    // Ajoute la nouvelle citation
-    gameQuotesContener.appendChild(pElement)
-    
-    // Attends un délai avant de poursuivre
-    await delay(1000)
-}
+
 
 
 
@@ -247,21 +241,18 @@ function multiplayerGame() {
     let turn_number = 1
     let score_board = [0]*NUMBER_OF_PLAYERS
     while (turn_number <= NUMBER_OF_TURNS) {
-        console.log(turn_number)
-        newQuote("Round 1")
+        // console.log(turn_number)
+        newQuote(`Round ${turn_number}`)
         let player_id = 0
         while (player_id < NUMBER_OF_PLAYERS) {
-            console.log(PLAYERS[player_id] + "'s turn")
+            // console.log(PLAYERS[player_id] + "'s turn")
             newQuote(PLAYERS[player_id] + "'s turn")
             let turn_score = game_turn(true)
             score_board[player_id] += turn_score
-            console.log(score_board)
+            // console.log(score_board)
             newQuote(score_board)
             player_id += 1
         }
         turn_number += 1
     }
 }
-
-
-multiplayerGame(PLAYERS)
