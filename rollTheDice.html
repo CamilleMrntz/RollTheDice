@@ -10,15 +10,21 @@
 
     <h1>Roll the dice</h1>
 
+    <script src="rollTheDice.js"></script>
 
-    <label for="">Roll ?</label>
-    <input type="text" id="playerAnswer">
 
-    <button type="button" onclick="getInputValue()">OK</button>
+    <form action="">
+      <label for="">Players</label>
+      <input type="text" id="players">
+      <input type="button" value="Add" onclick="insert()"></input>
+    </form>
+
+
+    <button type="button" id="yes" onclick="getInputValue('yes')">Yes</button>
+    <button type="button" id="no" onclick="getInputValue('no')">No</button>
 
     <button type="button" onclick="multiplayerGame(PLAYERS)">Play</button>
     <div id="gameQuotes"></div>
 
-    <script src="rollTheDice.js"></script>
 </body>
 </html>

@@ -150,10 +150,11 @@ function sum(arrayToSum) {
   return sum;
 }
 
-function getInputValue() {
-  let val = document.getElementById("playerAnswer").value;
+function getInputValue(value) {
+  let val = value;
   return val;
 }
+
 function game_turn(is_interactive = true) {
   // # turn start with the full set of dices
   let remaining_dice_to_roll = DEFAULT_DICES_NB;
@@ -208,7 +209,7 @@ function game_turn(is_interactive = true) {
       askStopTurn.innerHTML = "Do you want to roll this dice ? [y/n]";
 
       let value = getInputValue();
-      let stop_turn;
+      let stop_turn = null
 
       if (value === "y") {
         console.log(value);
