@@ -1,124 +1,78 @@
-// import random
+const NB_DICE_SIDE = 6; // # Nb of side of the Dices;
+const SCORING_DICE_VALUE = [1, 5]; // # list_value of the side values of the dice who trigger a standard score;
+const SCORING_MULTIPLIER = [100, 50]; // # list_value of multiplier for standard score;
 
-/* # ----------------------< Game rules constants  >-----------------------------------------------------------------------
-# Rules can be parametrized by this globals constants
-#
-# Standard Farkle rules :
-#  5 dices with 6 faces
-#  1 & 5 are scoring
-#  1 is scoring 100 pts
-#  5 is scoring 50 pts
-#
-#  Bonus for 3 dices with the same value
-#   3 ace is scoring 1000 pts
-#   3 time the same dice value is scoring 100 pts x the dice value
-*/
+const THRESHOLD_BONUS = 3; // # Threshold of the triggering for bonus in term of occurrence of the same slide value;
+const STD_BONUS_MULTIPLIER = 100; // # Standard multiplier for bonus;
+const ACE_BONUS_MULTIPLIER = 1000; // # Special multiplier for aces bonus;
 
-const NB_DICE_SIDE = 6 // # Nb of side of the Dices;
-const SCORING_DICE_VALUE = [1, 5] // # list_value of the side values of the dice who trigger a standard score;
-const SCORING_MULTIPLIER = [100, 50] // # list_value of multiplier for standard score;
-
-const THRESHOLD_BONUS = 3 // # Threshold of the triggering for bonus in term of occurrence of the same slide value;
-const STD_BONUS_MULTIPLIER = 100 // # Standard multiplier for bonus;
-const ACE_BONUS_MULTIPLIER = 1000 // # Special multiplier for aces bonus;
-
-const DEFAULT_DICES_NB = 5 // # Number of dices by default in the set;
-
+const DEFAULT_DICES_NB = 5; // # Number of dices by default in the set;
 
 function roll_dice_set(nb_dice_to_roll) {
-    /* """ Generate the occurrence list of dice value for nb_dice_to_roll throw
+  let dice_value_occurrence = Array(NB_DICE_SIDE).fill(0);
+  let dice_index = 0;
 
-        :parameters     nb_dice_to_roll         the number of dice to throw
+  while (dice_index < nb_dice_to_roll) {
+    let dice_value = Math.floor(Math.random() * (NB_DICE_SIDE - 1 + 1)) + 1;
+    dice_value_occurrence[dice_value - 1] += 1;
+    dice_index += 1;
+  }
 
-        :return:        occurrence list of dice value
-    """
-    */
-
-    let dice_value_occurrence = [0] * NB_DICE_SIDE
-    let dice_index = 0
-
-    while (dice_index < nb_dice_to_roll) {
-        // dice_value = random.randint(1, NB_DICE_SIDE)
-        let dice_value = Math.floor(Math.random() * (NB_DICE_SIDE - 1 + 1)) + 1
-        dice_value_occurrence[dice_value - 1] += 1
-        dice_index += 1
-    }
-
-    return dice_value_occurrence
+  return dice_value_occurrence;
 }
 
-
 function analyse_bonus_score(dice_value_occurrence) {
-    /* """ Compute the score for bonus rules and update occurrence list
+  let scoring_dice_value_occurrence = Array(NB_DICE_SIDE).fill(0);
 
-        :parameters     dice_value_occurrence       occurrence list of dice value
+  let bonus_score = 0;
+  let side_value_index = 0;
+  let bonus_multiplier = 1;
 
-        :return:        a dictionary with
-                        - 'score'                   the score from bonus rules
-                        - 'scoring_dice'            occurrence list of scoring dice value
-                        - 'non_scoring_dice'        occurrence list of non scoring dice value
-    """
-    */ 
+  while (side_value_index < dice_value_occurrence.length) {
+    let side_value_occurrence = dice_value_occurrence[side_value_index];
 
-    let scoring_dice_value_occurrence = [0] * NB_DICE_SIDE
+    let nb_of_bonus = Math.floor(side_value_occurrence / THRESHOLD_BONUS);
 
-    let bonus_score = 0
-    let side_value_index = 0
-    let bonus_multiplier = 1
-    while (side_value_index < dice_value_occurrence.length) {
-        let side_value_occurrence = dice_value_occurrence[side_value_index]
-    
-        let nb_of_bonus = side_value_occurrence // THRESHOLD_BONUS
-        if (nb_of_bonus > 0) {
-            if (side_value_index == 0) {
-                bonus_multiplier = ACE_BONUS_MULTIPLIER
-            } else {
-                bonus_multiplier = STD_BONUS_MULTIPLIER
-            }
-            bonus_score += nb_of_bonus * bonus_multiplier * (side_value_index + 1)
-    
-            // # update the occurrence list after bonus rules for scoring dices and non scoring dices
-            dice_value_occurrence[side_value_index] %= THRESHOLD_BONUS
-            scoring_dice_value_occurrence[side_value_index] = nb_of_bonus * THRESHOLD_BONUS
-        }
-    
-        side_value_index += 1
+    if (nb_of_bonus > 0) {
+      if (side_value_index == 0) {
+        bonus_multiplier = ACE_BONUS_MULTIPLIER;
+      } else {
+        bonus_multiplier = STD_BONUS_MULTIPLIER;
+      }
+
+      bonus_score += nb_of_bonus * bonus_multiplier * (side_value_index + 1);
+
+      // # update the occurrence list after bonus rules for scoring dices and non scoring dices
+      dice_value_occurrence[side_value_index] %= THRESHOLD_BONUS;
+      scoring_dice_value_occurrence[side_value_index] = nb_of_bonus * THRESHOLD_BONUS;
     }
 
-    let score = bonus_score
-    let scoring_dice = scoring_dice_value_occurrence
-    let non_scoring_dice = dice_value_occurrence
+    side_value_index += 1;
+  }
 
-    return { score,
-             scoring_dice,
-             non_scoring_dice
-    }
+  let score = bonus_score;
+  let scoring_dice = scoring_dice_value_occurrence;
+  let non_scoring_dice = dice_value_occurrence;
+
+  return {
+    score,
+    scoring_dice,
+    non_scoring_dice,
+  };
 }
 
 
 function analyse_standard_score(dice_value_occurrence) {
-    /* """ Compute the score for standard rules and update occurrence list
 
-        :warning :      occurrence list of dice value should be cleaned from potential bonus
-                        call analyse_bonus_score() first
 
-        :parameters     dice_value_occurrence       occurrence list of dice value
-
-        :return:        a dictionary with
-                        - 'score'                   the score from standard rules
-                        - 'scoring_dice'            occurrence list of scoring dice value
-                        - 'non_scoring_dice'        occurrence list of non scoring dice value
-    """
-    */
-
-    let scoring_dice_value_occurrence = [0] * NB_DICE_SIDE
+    let scoring_dice_value_occurrence = Array(NB_DICE_SIDE).fill(0);
     let scoring_multiplier = []
 
     let standard_score = 0
     let scoring_dice_value_index = 0
     while (scoring_dice_value_index < SCORING_DICE_VALUE.length) {
-        scoring_value = SCORING_DICE_VALUE[scoring_dice_value_index]
-        scoring_multiplier = SCORING_MULTIPLIER[scoring_dice_value_index]
+        let scoring_value = SCORING_DICE_VALUE[scoring_dice_value_index]
+        let scoring_multiplier = SCORING_MULTIPLIER[scoring_dice_value_index]
 
         standard_score += dice_value_occurrence[scoring_value - 1] * scoring_multiplier
 
@@ -142,16 +96,7 @@ function analyse_standard_score(dice_value_occurrence) {
 
 
 function analyse_score(dice_value_occurrence) {
-    /* """ Compute the score for standard and bonus rules, update occurrence list
 
-        :parameters     dice_value_occurrence       occurrence list of dice value
-
-        :return:        a dictionary with
-                        - 'score'                   the score from standard rules
-                        - 'scoring_dice'            occurrence list of scoring dice value
-                        - 'non_scoring_dice'        occurrence list of non scoring dice value
-    """
-    */
 
     let analyse_score_bonus = analyse_bonus_score(dice_value_occurrence)
     console.log("analyse bonus score function executed")
@@ -198,25 +143,7 @@ function sum(arrayToSum) {
 
 
 function game_turn(is_interactive=true) {
-    /* """ Handle a full player turn
 
-        :parameters     current_player      dictionary of player information
-                                            - 'name'
-                                            - 'score'
-                                            - 'lost_score'
-                                            - 'nb_of_roll'
-                                            - 'nb_of_turn'
-                                            - 'nb_of_scoring_turn'
-                                            - 'nb_of_non_scoring_turn'
-                                            - 'nb_of_full_roll'
-
-                        is_interactive      boolean for game mode
-                                            - True -> interactive game mode
-                                            - False -> random choice for game simulation
-
-        :return:        updated dictionary of player information after a game turn
-    """
-    */
 
     // # turn start with the full set of dices
     let remaining_dice_to_roll = DEFAULT_DICES_NB
@@ -264,7 +191,8 @@ function game_turn(is_interactive=true) {
             if (is_interactive) {
                 // # interactive decision for real game
                 newQuote("Do you want to roll this dice ? [y/n] ")
-                stop_turn = input("Do you want to roll this dice ? [y/n] ") == "n"
+                // stop_turn = input("Do you want to roll this dice ? [y/n] ") == "n"
+                stop_turn = !confirm("Do you want to roll this dice ? [y/n] ")
             }
             else {
                 // # random decision for game simulation (50/50)
@@ -285,13 +213,28 @@ function game_turn(is_interactive=true) {
     return turn_score
 }
 
-function newQuote(quote) {
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function newQuote(quote) {
     const pElement = document.createElement('p')
     let node = document.createTextNode(quote)
     pElement.appendChild(node)
     let gameQuotesContener = document.getElementById('gameQuotes')
+    
+    // Supprime toutes les citations précédentes
+    while (gameQuotesContener.firstChild) {
+        gameQuotesContener.removeChild(gameQuotesContener.firstChild)
+    }
+    
+    // Ajoute la nouvelle citation
     gameQuotesContener.appendChild(pElement)
+    
+    // Attends un délai avant de poursuivre
+    await delay(1000)
 }
+
 
 
 // # game_turn(True)
@@ -322,8 +265,3 @@ function multiplayerGame() {
 
 
 multiplayerGame(PLAYERS)
-
-
-/* line 199 sum() is not working 
-Variable roll_score line 198 cannot carry 3 return ?
-*/ 
