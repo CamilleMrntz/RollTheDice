@@ -126,7 +126,7 @@ function analyse_score(dice_value_occurrence) {
     let non_scoring_dice_from_std = analyse_score_std.non_scoring_dice
 
     // # the occurrence list of scoring dice value is the sum from scoring dice by bonus and standard rules
-    let scoring_dice_value_occurrence = [0] * NB_DICE_SIDE
+    let scoring_dice_value_occurrence = Array(NB_DICE_SIDE).fill(0);
     let side_value_index = 0
     while (side_value_index < NB_DICE_SIDE) {
         scoring_dice_value_occurrence[side_value_index] = scoring_dice_from_bonus[side_value_index] + scoring_dice_from_std[side_value_index]
@@ -239,7 +239,7 @@ const NUMBER_OF_TURNS = 3
 
 function multiplayerGame() {
     let turn_number = 1
-    let score_board = [0]*NUMBER_OF_PLAYERS
+    let score_board = Array(NUMBER_OF_PLAYERS).fill(0);
     while (turn_number <= NUMBER_OF_TURNS) {
         // console.log(turn_number)
         newQuote(`Round ${turn_number}`)
