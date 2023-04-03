@@ -85,9 +85,14 @@ function analyse_bonus_score(dice_value_occurrence) {
         side_value_index += 1
     }
 
-    return {score: bonus_score,
-            scoring_dice: scoring_dice_value_occurrence,
-            non_scoring_dice: dice_value_occurrence}
+    let score = bonus_score
+    let scoring_dice = scoring_dice_value_occurrence
+    let non_scoring_dice = dice_value_occurrence
+
+    return { score,
+             scoring_dice,
+             non_scoring_dice
+    }
 }
 
 
@@ -124,9 +129,14 @@ function analyse_standard_score(dice_value_occurrence) {
         scoring_dice_value_index += 1
     }
 
-    return {score: standard_score,
-            scoring_dice: scoring_dice_value_occurrence,
-            non_scoring_dice: dice_value_occurrence}
+    let score = standard_score
+    let scoring_dice = scoring_dice_value_occurrence
+    let non_scoring_dice = dice_value_occurrence
+
+    return { score,
+             scoring_dice,
+             non_scoring_dice
+    }
 
 }
 
@@ -144,11 +154,13 @@ function analyse_score(dice_value_occurrence) {
     */
 
     let analyse_score_bonus = analyse_bonus_score(dice_value_occurrence)
+    console.log("analyse bonus score function executed")
     let score_bonus = analyse_score_bonus.score
     let scoring_dice_from_bonus = analyse_score_bonus.scoring_dice
     let non_scoring_dice_from_bonus = analyse_score_bonus.non_scoring_dice
 
     let analyse_score_std = analyse_standard_score(non_scoring_dice_from_bonus)
+    console.log("analyse standard score function executed")
     let score_std = analyse_score_std.score
     let scoring_dice_from_std = analyse_score_std.scoring_dice
     let non_scoring_dice_from_std = analyse_score_std.non_scoring_dice
@@ -161,9 +173,27 @@ function analyse_score(dice_value_occurrence) {
         side_value_index += 1
     }
 
-    return {score: score_std + score_bonus,
-            scoring_dice: scoring_dice_value_occurrence,
-            non_scoring_dice: non_scoring_dice_from_std}
+    let score = score_std + score_bonus
+    let scoring_dice = scoring_dice_value_occurrence
+    let non_scoring_dice = non_scoring_dice_from_std
+
+    console.log("state " + score_std)
+
+    return {
+            score,
+            scoring_dice,
+            non_scoring_dice
+    }
+}
+
+
+function sum(arrayToSum) {
+    let sum = 0
+    
+    for (let i = 0; i < arrayToSum.length; i++) {
+        sum += array[i]
+    }
+    return sum
 }
 
 
@@ -197,12 +227,17 @@ function game_turn(is_interactive=true) {
         // # generate the dice roll and compute the scoring
         let dice_value_occurrence = roll_dice_set(remaining_dice_to_roll)
         let roll_score = analyse_score(dice_value_occurrence)
+       // remaining_dice_to_roll = roll_score.non_scoring_dice.reduce(function (a, b) { return a + b; }, 0)
         remaining_dice_to_roll = sum(roll_score.non_scoring_dice)
+       // remaining_dice_to_roll = sum(roll_score[2])
+
 
         if (roll_score.score == 0) {
             // # lost roll
 
-            console.log('\n-->', 'got zero point ', turn_score, 'lost points\n')
+            console.log('\n-->' + 'got zero point ' + turn_score + 'lost points\n')
+            newQuote('\n-->' + 'got zero point ' + turn_score + 'lost points\n')
+
 
             roll_again = false
             turn_score = 0
@@ -216,14 +251,19 @@ function game_turn(is_interactive=true) {
             if (remaining_dice_to_roll == 0) {
                 remaining_dice_to_roll = DEFAULT_DICES_NB
                 console.log('-->Full Roll')
+                newQuote('-->Full Roll')
             }
 
-            console.log('Roll Score=', roll_score.score, 'potential turn score=', turn_score, 'remaining dice=',
+            console.log(roll_score.score)
+            console.log('Roll Score='+ roll_score.score + 'potential turn score='+ turn_score + 'remaining dice=' +
+                  remaining_dice_to_roll)
+            newQuote('Roll Score='+ roll_score.score + 'potential turn score='+ turn_score + 'remaining dice=' +
                   remaining_dice_to_roll)
 
             // # choice to roll again or stop and take roll score
             if (is_interactive) {
                 // # interactive decision for real game
+                newQuote("Do you want to roll this dice ? [y/n] ")
                 stop_turn = input("Do you want to roll this dice ? [y/n] ") == "n"
             }
             else {
@@ -234,7 +274,8 @@ function game_turn(is_interactive=true) {
             if (stop_turn) {
                 // # stop turn and take roll score
 
-                console.log('\n-->', 'Scoring turn with', turn_score, 'points\n')
+                console.log('\n-->' + 'Scoring turn with' + turn_score + 'points\n')
+                newQuote('\n-->' + 'Scoring turn with' + turn_score + 'points\n')
 
                 roll_again = false
             }
@@ -242,6 +283,14 @@ function game_turn(is_interactive=true) {
     }
 
     return turn_score
+}
+
+function newQuote(quote) {
+    const pElement = document.createElement('p')
+    let node = document.createTextNode(quote)
+    pElement.appendChild(node)
+    let gameQuotesContener = document.getElementById('gameQuotes')
+    gameQuotesContener.appendChild(pElement)
 }
 
 
@@ -256,12 +305,15 @@ function multiplayerGame() {
     let score_board = [0]*NUMBER_OF_PLAYERS
     while (turn_number <= NUMBER_OF_TURNS) {
         console.log(turn_number)
+        newQuote("Round 1")
         let player_id = 0
         while (player_id < NUMBER_OF_PLAYERS) {
             console.log(PLAYERS[player_id] + "'s turn")
+            newQuote(PLAYERS[player_id] + "'s turn")
             let turn_score = game_turn(true)
             score_board[player_id] += turn_score
             console.log(score_board)
+            newQuote(score_board)
             player_id += 1
         }
         turn_number += 1
